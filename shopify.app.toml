@@ -2,6 +2,7 @@
 
 client_id = "7fc65e6058cca76725d78ae70c5489fa"
 name = "Banana Try-On"
+app
 application_url = "https://banana-try-on-app.vercel.app"
 embedded = true
 

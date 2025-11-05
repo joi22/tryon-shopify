@@ -2,6 +2,7 @@
   "buildCommand": "npm run build",
   "installCommand": "npm install",
   "devCommand": "npm run dev",
+  "outputDirectory": "build/client",
   "regions": ["iad1"],
   "git": {
     "deploymentEnabled": {
@@ -15,6 +16,12 @@
   "public": false,
   "cleanUrls": true,
   "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/api"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
