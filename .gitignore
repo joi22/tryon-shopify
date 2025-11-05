@@ -1,0 +1,33 @@
+node_modules
+.DS_Store
+
+/.cache
+/build
+/app/build
+/public/build/
+/public/_dev
+/app/public/build
+/prisma/dev.sqlite
+/prisma/dev.sqlite-journal
+database.sqlite
+
+.env
+.env.*
+
+
+
+
+
+/extensions/*/dist
+
+# Ignore shopify files created during app dev
+.shopify/*
+.shopify.lock
+.vercel
+.env*.local
+
+# Google Cloud service account credentials
+shopify-tryon-*.json
+*-service-account.json
+*.json.key
+*-credentials.json

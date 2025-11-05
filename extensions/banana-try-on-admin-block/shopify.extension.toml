@@ -1,0 +1,11 @@
+api_version = "2025-01"
+
+[[extensions]]
+uid = "54deef69-6124-c807-eabf-1e8a964b12dfcd053c29"
+type = "ui_extension"
+name = "Banana Try-On Settings"
+handle = "virtual-tryon-settings"
+
+[[extensions.targeting]]
+module = "./src/BlockExtension.js"
+target = "admin.product-details.block.render"

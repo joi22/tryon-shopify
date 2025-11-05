@@ -1,0 +1,513 @@
+/* Virtual Try-On - Simplified CSS with Theme Inheritance */
+
+/* Root CSS Variables that inherit from theme */
+:root {
+  --vt-radius: 8px;
+  --vt-radius-sm: 4px;
+  --vt-transition: 0.2s ease;
+
+  /* Color defaults - can be overridden by inline styles */
+  --vt-button-bg: inherit;
+  --vt-button-text: inherit;
+  --vt-modal-bg: inherit;
+  --vt-modal-text: inherit;
+  --vt-button-width: 100%;
+}
+
+/* Main button - inherits from theme button classes */
+#virtual-tryon-button {
+  width: var(--vt-button-width);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#virtual-tryon-button svg {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+/* Button color variations */
+.vt-button--primary {
+  /* Primary inherits from button product-form__submit naturally */
+  /* No need to override - themes already style these correctly */
+}
+
+.vt-button--secondary {
+  /* Secondary style - outlined button */
+  background: transparent !important;
+  color: rgb(var(--color-foreground)) !important;
+  border: 1px solid rgba(var(--color-foreground), 0.2) !important;
+}
+
+.vt-button--secondary:hover {
+  background: rgba(var(--color-foreground), 0.05) !important;
+  border-color: rgba(var(--color-foreground), 0.3) !important;
+}
+
+.vt-button--custom {
+  background: var(--vt-button-bg) !important;
+  color: var(--vt-button-text) !important;
+  border-color: transparent !important;
+}
+
+/* Text link style - inherits from theme by default */
+.vt-button--link {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: normal !important;
+  text-decoration: underline !important;
+  box-shadow: none !important;
+  min-height: auto !important;
+  width: auto !important;
+  display: inline-flex !important;
+  justify-content: flex-start !important;
+  align-items: baseline !important;
+  gap: 0.25rem !important;
+  cursor: pointer !important;
+  transition: opacity 0.2s ease !important;
+}
+
+.vt-button--link:hover {
+  opacity: 0.8;
+  text-decoration: underline !important;
+}
+
+/* Link size variations */
+.vt-button--link.vt-link--small {
+  font-size: 0.875em !important;
+}
+
+.vt-button--link.vt-link--large {
+  font-size: 1.125em !important;
+}
+
+.vt-button--link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+.vt-button--link svg {
+  width: 1em !important;
+  height: 1em !important;
+}
+
+/* Ensure text link doesn't inherit button width in container */
+.virtual-tryon-container {
+  text-align: left;
+}
+
+/* Button width variations - only apply to main button, not modal buttons */
+#virtual-tryon-button.vt-button--width-auto {
+  width: auto !important;
+  min-width: 120px;
+}
+
+#virtual-tryon-button.vt-button--width-fixed {
+  width: var(--vt-button-width) !important;
+}
+
+/* Dialog - native styling with theme colors */
+.virtual-tryon-modal {
+  max-width: min(90vw, 600px);
+  width: 100%;
+  padding: 0;
+  border: none;
+  border-radius: var(--vt-radius);
+  background: var(--color-base-background-1, var(--color-background, #ffffff));
+  color: var(--color-base-text, var(--color-foreground, #121212));
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.virtual-tryon-modal::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Modal background variations */
+.vt-modal--light {
+  background: #ffffff !important;
+  color: #121212 !important;
+}
+
+.vt-modal--light .modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.vt-modal--light .upload-option {
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.vt-modal--dark {
+  background: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.vt-modal--dark .modal-header {
+  border-bottom-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.vt-modal--dark .upload-option {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.vt-modal--dark .button--secondary {
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #ffffff !important;
+}
+
+.vt-modal--custom {
+  background: var(--vt-modal-bg) !important;
+  color: var(--vt-modal-text) !important;
+}
+
+/* Modal structure */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--color-border, rgba(0, 0, 0, 0.08));
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  padding: 0.5rem;
+  margin: -0.5rem;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.6;
+  transition: opacity var(--vt-transition);
+}
+
+.modal-close:hover {
+  opacity: 1;
+}
+
+.modal-close:focus {
+  outline: none;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+/* Upload options */
+.upload-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.upload-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+  aspect-ratio: 1;
+  border: 2px dashed rgba(var(--color-foreground), 0.15);
+  border-radius: var(--vt-radius-sm);
+  background: transparent;
+  color: rgb(var(--color-foreground));
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  transition: all var(--vt-transition);
+}
+
+.upload-option:hover,
+.upload-option:focus-visible {
+  border-color: rgba(var(--color-foreground), 0.3);
+  background: rgba(var(--color-foreground), 0.03);
+  transform: translateY(-2px);
+}
+
+.upload-option svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  stroke-width: 1.5;
+}
+
+.upload-option span {
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* Views */
+[data-state] {
+  text-align: center;
+}
+
+/* Image container for overlay effect */
+.image-container {
+  position: relative;
+  width: 100%;
+  margin: 0 auto 1.5rem;
+}
+
+
+/* Media elements */
+#camera-video,
+#preview-image,
+#result-image {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--vt-radius-sm);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+#camera-video {
+  background: #333;
+  margin: 0 auto 1.5rem;
+  aspect-ratio: 1;
+  width: 100%;
+  object-fit: cover;
+}
+
+/* Messages - better spacing */
+.preview-message,
+.view-result > p {
+  margin: 0.5rem 0 1.75rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+  text-align: center;
+  color: inherit;
+  opacity: 0.9;
+}
+
+/* Processing pulse animation */
+@keyframes processingPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.image-container.processing #preview-image {
+  animation: processingPulse 1.5s ease-in-out infinite;
+}
+
+/* Processing overlay */
+.processing-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--vt-radius-sm);
+  color: #ffffff;
+  pointer-events: none;
+}
+
+.processing-overlay .spinner {
+  display: none;
+}
+
+.processing-overlay p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
+}
+
+/* Button groups - primary action on right */
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.button-group .button {
+  flex: 1;
+  min-width: 0;
+  padding: 0.75rem 1rem;
+  line-height: 1.2;
+  height: auto;
+  min-height: 2.5rem;
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.button-group .button svg {
+  width: 1.25em;
+  height: 1.25em;
+  flex-shrink: 0;
+}
+
+/* Disabled button style */
+.button[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Secondary button style override */
+.button--secondary {
+  background: transparent;
+  color: var(--color-base-text, inherit);
+  border: 1px solid var(--color-border, currentColor);
+}
+
+.button--secondary:hover {
+  background: var(--color-base-background-2, rgba(0, 0, 0, 0.05));
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1.5rem;
+  border: 3px solid var(--color-border, rgba(0, 0, 0, 0.1));
+  border-top-color: var(--color-base-accent-1, #121212);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+/* Small spinner for buttons */
+.button .spinner {
+  width: 1rem;
+  height: 1rem;
+  border-width: 2px;
+  margin: 0 0.5rem 0 0;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error state */
+.error-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  margin: 0 auto 1rem;
+  padding: 0.75rem;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.error-icon svg {
+  width: 100%;
+  height: 100%;
+  color: #dc2626;
+}
+
+.error-title {
+  margin: 0 0 0.5rem;
+  color: #dc2626;
+}
+
+/* Screen reader only class */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Responsive */
+@media (max-width: 749px) {
+  /* Keep upload options side by side on mobile */
+  .upload-options {
+    gap: 0.75rem;
+  }
+
+  .upload-option {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .upload-option svg {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .upload-option span {
+    font-size: 0.85rem;
+  }
+
+  /* Keep buttons side by side on mobile with tighter spacing */
+  .button-group {
+    gap: 0.5rem;
+  }
+
+  .button-group .button {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+
+/* Utility */
+[hidden] {
+  display: none !important;
+}
+
+/* Dark mode support via theme or system preference */
+@media (prefers-color-scheme: dark) {
+  .virtual-tryon-modal {
+    background: var(--color-base-background-1, #1a1a1a);
+    color: var(--color-base-text, #ffffff);
+  }
+
+  .modal-header {
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .upload-option {
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .upload-option:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .button--secondary {
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+
+  .button--secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .spinner {
+    border-color: rgba(255, 255, 255, 0.1);
+    border-top-color: #ffffff;
+  }
+}

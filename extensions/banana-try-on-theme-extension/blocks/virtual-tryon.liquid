@@ -1,0 +1,361 @@
+{% comment %}
+  Virtual Try-On Button Block
+  Shows a try-on button on product pages when enabled via metafield
+{% endcomment %}
+
+{% comment %} Check if app is globally disabled {% endcomment %}
+{% assign globally_disabled = app.metafields.settings.globally_disabled.value %}
+
+{% comment %} Check if virtual try-on is enabled for this product {% endcomment %}
+{% assign tryon_enabled = product.metafields.custom.virtual_tryon_enabled.value %}
+
+{% comment %} Show button only if globally enabled AND product enabled {% endcomment %}
+{% comment %} Product is enabled by default unless explicitly disabled {% endcomment %}
+{% if globally_disabled != true and tryon_enabled != false %}
+  {% comment %} Add custom CSS variables for color settings {% endcomment %}
+  {% if block.settings.button_style == 'custom' or block.settings.modal_background == 'custom' %}
+    <style>
+      #shopify-block-{{ block.id }} {
+        {% if block.settings.button_style == 'custom' %}
+          --vt-button-bg: {{ block.settings.button_custom_color }};
+          --vt-button-text: {{ block.settings.button_text_color }};
+        {% endif %}
+        {% if block.settings.modal_background == 'custom' %}
+          --vt-modal-bg: {{ block.settings.modal_custom_bg }};
+          --vt-modal-text: {{ block.settings.modal_text_color }};
+        {% endif %}
+      }
+    </style>
+  {% endif %}
+
+  {% comment %} Add custom CSS if provided {% endcomment %}
+  {% if block.settings.custom_css != blank %}
+    <style>
+      {{ block.settings.custom_css }}
+    </style>
+  {% endif %}
+
+  {{ 'virtual-tryon.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'virtual-tryon.js' | asset_url }}" defer></script>
+
+  <div class="virtual-tryon-container" id="shopify-block-{{ block.id }}">
+    <button
+      id="virtual-tryon-button"
+      class="{% if block.settings.button_style == 'link' %}vt-button--link{% else %}button product-form__submit{% if block.settings.button_style != 'auto' %} vt-button--{{ block.settings.button_style }}{% endif %}{% endif %}"
+      data-product-id="{{ product.id }}"
+      data-variant-id="{{ product.selected_or_first_available_variant.id }}"
+      data-product-title="{{ product.title | escape }}"
+      data-product-image="{{ product.featured_image | image_url: width: 1024 }}"
+      type="button"
+    >
+      {{ block.settings.button_text }}
+    </button>
+  </div>
+
+  {% comment %} Modal using native dialog element {% endcomment %}
+  <dialog id="virtual-tryon-modal" class="virtual-tryon-modal{% if block.settings.modal_background != 'auto' %} vt-modal--{{ block.settings.modal_background }}{% endif %}" aria-labelledby="virtual-tryon-title">
+    <div class="modal-content">
+      <header class="modal-header">
+        <h2 id="virtual-tryon-title">{{ block.settings.modal_title }}</h2>
+        <button class="modal-close" aria-label="Close" type="button">&times;</button>
+      </header>
+
+      <div class="modal-body">
+        {% comment %} Upload Options {% endcomment %}
+        <div class="upload-options" data-state="options">
+          <button id="camera-button" class="upload-option" type="button">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>{{ block.settings.camera_text | default: 'Take Photo' }}</span>
+          </button>
+
+          <label for="file-input" class="upload-option" role="button" tabindex="0">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            <span>{{ block.settings.upload_text | default: 'Upload Photo' }}</span>
+            <input type="file" id="file-input" accept="image/*" hidden>
+          </label>
+        </div>
+
+        {% comment %} Camera View {% endcomment %}
+        <div class="view-camera" data-state="camera" hidden>
+          <video id="camera-video" autoplay playsinline></video>
+          <div class="button-group">
+            <button id="cancel-camera" class="button button--secondary" type="button">
+              {{ block.settings.cancel_text | default: 'Cancel' }}
+            </button>
+            <button id="capture-button" class="button" type="button">
+              {{ block.settings.capture_text | default: 'Capture' }}
+            </button>
+          </div>
+        </div>
+
+        {% comment %} Preview {% endcomment %}
+        <div class="view-preview" data-state="preview" hidden>
+          <div class="image-container">
+            <img id="preview-image" alt="Your photo">
+            <div class="processing-overlay" hidden>
+              <p>{{ block.settings.loading_text | default: 'Processing your try-on...' }}</p>
+            </div>
+          </div>
+          <p class="preview-message">{{ block.settings.preview_message | default: 'Ready to try on?' }}</p>
+          <div class="button-group preview-buttons">
+            <button id="retake-button" class="button button--secondary" type="button">
+              {{ block.settings.retake_text | default: 'Choose Different Photo' }}
+            </button>
+            <button id="process-button" class="button" type="button">
+              {{ block.settings.process_text | default: 'Try It On' }}
+            </button>
+          </div>
+          <div class="button-group processing-buttons" hidden>
+            <button id="cancel-processing" class="button button--secondary" type="button">
+              {{ block.settings.cancel_text | default: 'Cancel' }}
+            </button>
+            <button id="add-to-cart-processing" class="button" type="button" disabled>
+              {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
+            </button>
+          </div>
+        </div>
+
+        {% comment %} Result {% endcomment %}
+        <div class="view-result" data-state="result" hidden>
+          <div class="image-container">
+            <img id="result-image" alt="Virtual try-on result">
+          </div>
+          <p>{{ block.settings.result_message | default: 'Looking great!' }}</p>
+          <div class="button-group">
+            <button id="try-again" class="button button--secondary" type="button">
+              {{ block.settings.try_again_text | default: 'Try Another Photo' }}
+            </button>
+            <button id="add-to-cart" class="button" type="button">
+              {{ block.settings.add_to_cart_text | default: 'Add to cart' }}
+            </button>
+          </div>
+        </div>
+
+        {% comment %} Loading - kept for backwards compatibility but not used {% endcomment %}
+        <div class="view-loading" data-state="loading" hidden>
+          <div class="spinner"></div>
+          <p>{{ block.settings.loading_text | default: 'Processing your try-on...' }}</p>
+        </div>
+
+        {% comment %} Error {% endcomment %}
+        <div class="view-error" data-state="error" hidden>
+          <div class="error-icon">
+          </div>
+          <h3 class="error-title"></h3>
+          <p class="error-message"></p>
+          <div class="button-group">
+            <button id="error-cancel" class="button button--secondary" type="button">
+              {{ block.settings.cancel_text | default: 'Cancel' }}
+            </button>
+            <button id="error-retry" class="button" type="button">
+              {{ block.settings.retry_text | default: 'Try Again' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </dialog>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Banana Try-On",
+  "target": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Button Settings"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Try it on"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button Style",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto (Theme Default)"
+        },
+        {
+          "value": "primary",
+          "label": "Primary"
+        },
+        {
+          "value": "secondary",
+          "label": "Secondary"
+        },
+        {
+          "value": "link",
+          "label": "Text Link"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "button_custom_color",
+      "label": "Custom Button Color",
+      "default": "#000000",
+      "info": "Only used when Button Style is set to Custom"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Button Text Color",
+      "default": "#ffffff",
+      "info": "Only used when Button Style is set to Custom"
+    },
+    {
+      "type": "header",
+      "content": "Modal Settings"
+    },
+    {
+      "type": "select",
+      "id": "modal_background",
+      "label": "Modal Style",
+      "default": "auto",
+      "options": [
+        {
+          "value": "auto",
+          "label": "Auto (Theme Default)"
+        },
+        {
+          "value": "light",
+          "label": "Light"
+        },
+        {
+          "value": "dark",
+          "label": "Dark"
+        },
+        {
+          "value": "custom",
+          "label": "Custom"
+        }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "modal_custom_bg",
+      "label": "Custom Modal Background",
+      "default": "#ffffff",
+      "info": "Only used when Modal Style is set to Custom"
+    },
+    {
+      "type": "color",
+      "id": "modal_text_color",
+      "label": "Modal Text Color",
+      "default": "#121212",
+      "info": "Only used when Modal Style is set to Custom"
+    },
+    {
+      "type": "header",
+      "content": "Text Labels"
+    },
+    {
+      "type": "text",
+      "id": "modal_title",
+      "label": "Modal Title",
+      "default": "Virtual try-on"
+    },
+    {
+      "type": "text",
+      "id": "camera_text",
+      "label": "Camera Button Text",
+      "default": "Take photo"
+    },
+    {
+      "type": "text",
+      "id": "upload_text",
+      "label": "Upload Button Text",
+      "default": "Upload photo"
+    },
+    {
+      "type": "text",
+      "id": "capture_text",
+      "label": "Capture Button Text",
+      "default": "Capture"
+    },
+    {
+      "type": "text",
+      "id": "process_text",
+      "label": "Process Button Text",
+      "default": "Try it on"
+    },
+    {
+      "type": "text",
+      "id": "add_to_cart_text",
+      "label": "Add to Cart Button Text",
+      "default": "Add to cart"
+    },
+    {
+      "type": "text",
+      "id": "cancel_text",
+      "label": "Cancel Button Text",
+      "default": "Cancel"
+    },
+    {
+      "type": "text",
+      "id": "retake_text",
+      "label": "Retake Button Text",
+      "default": "Choose different photo"
+    },
+    {
+      "type": "text",
+      "id": "try_again_text",
+      "label": "Try Again Button Text",
+      "default": "Try another photo"
+    },
+    {
+      "type": "text",
+      "id": "retry_text",
+      "label": "Retry Button Text",
+      "default": "Try again"
+    },
+    {
+      "type": "text",
+      "id": "preview_message",
+      "label": "Preview Message",
+      "default": "Ready to try on?"
+    },
+    {
+      "type": "text",
+      "id": "result_message",
+      "label": "Success Message",
+      "default": "Looking great!"
+    },
+    {
+      "type": "text",
+      "id": "loading_text",
+      "label": "Loading Message",
+      "default": "Processing your try-on..."
+    },
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "textarea",
+      "id": "custom_css",
+      "label": "Custom CSS",
+      "info": "Add custom CSS to override default styles. Use with caution.",
+      "placeholder": "/* Example: Change button color */\n#virtual-tryon-button {\n  background-color: #ff6600;\n  color: white;\n}\n\n/* Example: Change modal width */\n.virtual-tryon-modal {\n  max-width: 800px;\n}"
+    }
+  ]
+}
+{% endschema %}
